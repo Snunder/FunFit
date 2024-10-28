@@ -138,6 +138,12 @@ class data_for_plot():
         self.indexes = None
         self.data = self.Z
         X, Y = np.meshgrid(self.x, self.y)
+        
+        self.x1_index = 0
+        self.x2_index = len(self.x)
+        self.y1_index = 0
+        self.y2_index = len(self.y)
+
         self.dataX = X
         self.dataY = Y
         self.Z_rot_data = None

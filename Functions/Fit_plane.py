@@ -24,6 +24,17 @@ def main():
     # Subtract fitted plane from tmp_dat_file.Z
     tmp_dat_file.Z = tmp_dat_file.Z - (reg.coef_[0]*X + reg.coef_[1]*Y + reg.intercept_)
 
+    x1_index = min(tmp_dat_file.x1_index, tmp_dat_file.x2_index)
+    x2_index = max(tmp_dat_file.x1_index, tmp_dat_file.x2_index)
+    y1_index = min(tmp_dat_file.y1_index, tmp_dat_file.y2_index)
+    y2_index = max(tmp_dat_file.y1_index, tmp_dat_file.y2_index)
+
+    X, Y = np.meshgrid(tmp_dat_file.x, tmp_dat_file.y)
+
+    tmp_dat_file.data = tmp_dat_file.Z[y1_index:y2_index, x1_index:x2_index]
+    tmp_dat_file.dataX = X[y1_index:y2_index, x1_index:x2_index]
+    tmp_dat_file.dataY = Y[y1_index:y2_index, x1_index:x2_index]
+
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
