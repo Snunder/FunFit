@@ -137,6 +137,25 @@ class FunctionCaller(QMainWindow):
             event.accept()
 
 
+
+class Rectangle(QFrame):
+    def __init__(self, parent, width, height):
+        super().__init__(parent)
+        geom = parent.centralWidget().layout().itemAt(parent.centralWidget().layout().count() - 1).widget().geometry()
+
+        size = int(geom.height()/2-geom.width()/2)
+        if size < 0:
+            size = 0
+
+        y_offset = parent.centralWidget().geometry().y()
+
+        layout = QHBoxLayout(self)
+        self.setStyleSheet("QFrame {border: 5px dashed #937CC2;background-color: none;}")
+        self.setFrameStyle(QFrame.Shape.Box | QFrame.Shadow.Plain)
+        self.setLineWidth(2)
+        self.setGeometry(min(parent.w.x1, parent.w.x2)+geom.x(), min(parent.w.y1, parent.w.y2)+y_offset+geom.y()+size, width, height)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -288,6 +307,11 @@ class MainWindow(QMainWindow):
             x.itemAt(x.count() - 1).widget().deleteLater()
         x.addWidget(self.image)
 
+        try:
+            self.R.deleteLater()
+        except:
+            pass
+
     def find_struct(self):
         if loaded:
             # Load the tmp_dat_file object from the file
@@ -314,7 +338,13 @@ class MainWindow(QMainWindow):
         if not hasattr(self.w, 'x2'):
             self.not_struct_chosen()
         else:
-            print("Implement rectangle drawing on figure in main window")
+            try:
+                self.R.deleteLater()
+            except:
+                pass
+            self.R = Rectangle(self, self.w.x2-self.w.x1, self.w.y2-self.w.y1)
+            self.R.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+            self.R.show()
 
     def level_data(self):
         if loaded:

@@ -144,11 +144,10 @@ class Rectangle(QtWidgets.QFrame):
     def __init__(self, parent, width, height):
         super().__init__(parent)
         layout = QtWidgets.QHBoxLayout(self)
-        
         self.setStyleSheet("QFrame {border: 5px dashed #937CC2;background-color: none;}")
         self.setFrameStyle(QtWidgets.QFrame.Shape.Box | QtWidgets.QFrame.Shadow.Plain)
         self.setLineWidth(2)
-        self.setGeometry(min(parent.x1, parent.x2), min(parent.y1, parent.y2)+35, width, height+5)
+        self.setGeometry(min(parent.x1, parent.x2)+parent.label.geometry().x(), min(parent.y1, parent.y2)+35+parent.label.geometry().y(), width, height)
 
 def analyze_data():
     # Load the tmp_dat_file object from the file
