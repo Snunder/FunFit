@@ -101,7 +101,7 @@ def gwyddionSPM(filename):
     data = np.char.replace(data, 'e-', 'e-')
     Z = data.astype(np.float64)
     Z = Z.reshape((rowsize, columnsize))
-    return x, y, Z, x_scale, y_scale
+    return x, y, Z*1e9, x_scale, y_scale
 
 # FUNFIT OUTPUT
 def funfitTXT(filename):

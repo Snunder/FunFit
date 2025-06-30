@@ -614,7 +614,7 @@ class ParameterSelectionWindow(QMainWindow):
         if self.function_name == "Gaussian": # No idea why, but this is necessary
             popt[FITTINGPARAMETERS.index('µ_y')] = max(self.parent.Raw_y) - popt[FITTINGPARAMETERS.index('µ_y')]
         
-        self.results_window = ResultsWindow(self, popt=popt, perr=perr, func_name=self.function_name, param_names=filtered_params)
+        self.results_window = ResultsWindow(self, popt=popt, perr=perr, func_name=self.function_name, param_names=filtered_params, plot_window=self.plot_window)
         self.results_window.show()
         self.close()
 
@@ -638,7 +638,13 @@ def init_interface(parent=None, parameters=None, function_name="Parameter Select
 
 """Fit_handling.create_param_widget - Used when fitting functions"""
 def create_param_widget(param, parent=None):
-    label = QLabel(f"{param} =")
+    unit_map = {
+        'µ_x': 'µm', 'µ_y': 'µm', 'A': 'nm', 'λ': 'µm', 'φ': 'rad', 'θ': '°',
+        'x0': 'µm', 'y0': 'µm', 'c': 'nm', 'σ': 'µm',
+        'µ': 'µm', 'b': 'µm⁻¹', 'N': ''
+    }
+    unit = unit_map.get(param.split('<sub>')[0], '')
+    label = QLabel(f"{param} ({unit})=") if unit else QLabel(f"{param} =")
     label.setObjectName("param_label")
     line_edit = QLineEdit()
     line_edit.setObjectName("param_edit")

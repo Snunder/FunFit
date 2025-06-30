@@ -4,6 +4,7 @@ from io import BytesIO
 """External modules"""
 import numpy as np
 import matplotlib
+import matplotlib.pyplot as plt
 matplotlib.use("Agg")
 import matplotlib.colors
 from matplotlib.colors import LinearSegmentedColormap
@@ -23,14 +24,17 @@ except:
     from Functions import helpers, Fit_config
 
 FIT_EQUATIONS = Fit_config.FIT_EQUATIONS
+LINE_CUT_FACE_COLOR = "#FFFFFF"
+PLOT_TEXT_COLOR = "#000000"
 
 class ResultsWindow(QMainWindow):
     """Window to display fitting results."""
-    def __init__(self, parent, popt, perr, func_name, param_names):
+    def __init__(self, parent, popt, perr, func_name, param_names, plot_window=None):
         super().__init__(parent)
         self.parent = parent
         self.popt, self.perr = popt, perr
         self.func_name, self.param_names = func_name, param_names
+        self.plot_window = plot_window
         helpers.setStyleSheet_from_file(self, self.parent.parent.current_dir + "/GUI/stylesheet.qss")
         self.init_ui()
 
@@ -96,7 +100,7 @@ class ResultsWindow(QMainWindow):
         ]
 
         # Populate the table
-        self.table.setRowCount(len(filtered_params))
+        self.table.setRowCount(len(filtered_params)+1)
         for i, (name, val, err, base) in enumerate(filtered_params):
             unit = unit_map.get(base, '')
             val_text = f"{val:.3f} {unit}" if unit else f"{val:.3f}"
@@ -106,6 +110,12 @@ class ResultsWindow(QMainWindow):
             self.table.setItem(i, 1, QTableWidgetItem(val_text))
             self.table.setItem(i, 2, QTableWidgetItem(err_text))
             self.table.setRowHeight(i, 40)
+        # Add the RMSE to the table
+        self.table.setItem(i+1, 0, QTableWidgetItem('RMSE'))
+        self.table.setItem(i+1, 1, QTableWidgetItem(f"{self.plot_window.rmse:.4f} nm"))
+        self.table.setItem(i+1, 2, QTableWidgetItem(''))
+        self.table.setRowHeight(i+1, 40)
+
         self.table.setItemDelegate(HTMLDelegate())
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         self.table.verticalHeader().setVisible(False)
@@ -149,6 +159,20 @@ class PlotWindow(QMainWindow):
         self.parent = parent
         self.x, self.y, self.Z_data, self.Z_fit = x, y, Z_data, Z_fit
         self.Z_residual = Z_data - Z_fit
+        plt.rcParams.update({
+                    'font.size': 14,
+                    'figure.facecolor': LINE_CUT_FACE_COLOR,
+                    'figure.edgecolor': PLOT_TEXT_COLOR,
+                    'axes.facecolor': LINE_CUT_FACE_COLOR,
+                    'axes.edgecolor': PLOT_TEXT_COLOR,
+                    'axes.labelcolor': PLOT_TEXT_COLOR,
+                    'xtick.color': PLOT_TEXT_COLOR,
+                    'ytick.color': PLOT_TEXT_COLOR,
+                    'text.color': PLOT_TEXT_COLOR,
+                    'axes.titlesize': 16,
+                    'xtick.labelsize': 14,
+                    'ytick.labelsize': 14,
+                    })
         self.init_ui()
 
     def init_ui(self): # Set up the PlotWindow UI
@@ -317,6 +341,7 @@ class PlotWindow(QMainWindow):
         self.cbar3 = self.figure.colorbar(c3, ax=self.ax3, fraction=0.05, pad=0.05)
         self.cbar3.set_label('Residual, $ΔZ$ (nm)', labelpad=14, rotation=270, fontsize=12)
         rmse = np.sqrt(np.nanmean(Z_residual_masked**2))
+        self.rmse = rmse
         self.ax3.set_title(f'Residual [RMSE: {rmse:.4f} nm]')
 
     def plot_residual_FFT(self):
